@@ -1,0 +1,37 @@
+# Local Python environments and caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+pytest-cache-files-*/
+tests/.pytest_tmp/
+.mypy_cache/
+.ruff_cache/
+
+# Credentials and local configuration
+.env
+.env.*
+!.env.example
+
+# Downloaded market data and generated research output
+data/
+reports/
+*.pkl
+*.parquet
+*.jsonl
+*.ndjson
+
+# Logs, temporary files, archives and editor state
+logs/
+tmp/
+*.log
+*.tmp
+*.bak
+*.zip
+.vscode/
+.idea/
+.agents/
+.codex/
+.DS_Store
+Thumbs.db

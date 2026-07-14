@@ -1,0 +1,450 @@
+project:
+  name: cross_market_idio_reversion_hourly
+  timezone: UTC
+  random_seed: 42
+
+symbols:
+  NVDA:
+    cash_symbol: NVDA
+    perp_symbol: NVDAUSDT
+    perp_to_cash_multiplier: 1.0
+  TSLA:
+    cash_symbol: TSLA
+    perp_symbol: TSLAUSDT
+    perp_to_cash_multiplier: 1.0
+  AMD:
+    cash_symbol: AMD
+    perp_symbol: AMDUSDT
+    perp_to_cash_multiplier: 1.0
+  META:
+    cash_symbol: META
+    perp_symbol: METAUSDT
+    perp_to_cash_multiplier: 1.0
+  AAPL:
+    cash_symbol: AAPL
+    perp_symbol: AAPLUSDT
+    perp_to_cash_multiplier: 1.0
+  MSFT:
+    cash_symbol: MSFT
+    perp_symbol: MSFTUSDT
+    perp_to_cash_multiplier: 1.0
+  AMZN:
+    cash_symbol: AMZN
+    perp_symbol: AMZNUSDT
+    perp_to_cash_multiplier: 1.0
+
+collector:
+  poll_seconds: 2.0
+  request_timeout_seconds: 8.0
+  alpaca_feed: iex
+  alpaca_base_url: https://data.alpaca.markets
+  binance_base_url: https://fapi.binance.com
+  raw_dir: data/raw
+  factor_raw_dir: data/factor_raw
+
+historical:
+  start_date: "2026-02-01"
+  end_date: "2026-07-10"
+  factor_start_date: "2023-01-01"
+  interval: 1m
+  cache_dir: data/historical
+  alpaca_feed: iex
+  request_pause_seconds: 0.25
+  max_parallel_instruments: 3
+  modeled_cash_roundtrip_spread_bps: 4.0
+  modeled_perp_roundtrip_spread_bps: 6.0
+  max_cash_index_gap_bps: 1000.0
+  min_screen_trades: 20
+
+factor_strategy:
+  target_count_minimum: 25
+  execution_interval: 5m
+  signal_interval: 30m
+  factors:
+    BTC:
+      perp_symbol: BTCUSDT
+      cost_profile: crypto_major
+    ETH:
+      perp_symbol: ETHUSDT
+      cost_profile: crypto_major
+    SOL:
+      perp_symbol: SOLUSDT
+      cost_profile: crypto_large
+    QQQ:
+      perp_symbol: QQQUSDT
+      cost_profile: tradfi_index
+    SPY:
+      perp_symbol: SPYUSDT
+      cost_profile: tradfi_index
+    SOXL:
+      perp_symbol: SOXLUSDT
+      cost_profile: tradfi_sector
+  targets:
+    MSTR:
+      perp_symbol: MSTRUSDT
+      category: crypto_equity
+      session: us_rth
+      factors: [BTC, QQQ]
+      cost_profile: crypto_equity
+      logic: BTC treasury exposure plus US technology equity risk
+      invalidation: treasury policy or equity structure changes materially
+    COIN:
+      perp_symbol: COINUSDT
+      category: crypto_equity
+      session: us_rth
+      factors: [BTC, ETH, QQQ]
+      cost_profile: crypto_equity
+      logic: crypto trading activity plus US technology equity risk
+      invalidation: revenue becomes weakly linked to crypto activity
+    HOOD:
+      perp_symbol: HOODUSDT
+      category: crypto_equity
+      session: us_rth
+      factors: [BTC, QQQ]
+      cost_profile: crypto_equity
+      logic: retail crypto activity plus US growth equity risk
+      invalidation: product mix ceases to depend on crypto participation
+    CRCL:
+      perp_symbol: CRCLUSDT
+      category: crypto_equity
+      session: us_rth
+      factors: [BTC, ETH, QQQ]
+      cost_profile: crypto_equity_thin
+      logic: stablecoin adoption plus crypto and US equity risk
+      invalidation: reserve economics or stablecoin regulation changes materially
+    IREN:
+      perp_symbol: IRENUSDT
+      category: crypto_equity
+      session: us_rth
+      factors: [BTC, QQQ]
+      cost_profile: crypto_equity_thin
+      logic: mining economics plus data-center growth equity risk
+      invalidation: non-mining business dominates enterprise value
+    BMNR:
+      perp_symbol: BMNRUSDT
+      category: crypto_equity
+      session: us_rth
+      factors: [ETH, QQQ]
+      cost_profile: crypto_equity_thin
+      logic: ETH treasury exposure plus US speculative equity risk
+      invalidation: treasury holdings or financing policy changes materially
+    ETH:
+      perp_symbol: ETHUSDT
+      category: crypto_asset
+      session: continuous
+      factors: [BTC]
+      cost_profile: crypto_major
+      logic: smart-contract market beta relative to the crypto reserve asset
+      invalidation: ETH decouples structurally from broad crypto risk
+    SOL:
+      perp_symbol: SOLUSDT
+      category: crypto_asset
+      session: continuous
+      factors: [BTC, ETH]
+      cost_profile: crypto_large
+      logic: high-beta L1 exposed to broad crypto and smart-contract demand
+      invalidation: SOL-specific adoption dominates market beta persistently
+    BNB:
+      perp_symbol: BNBUSDT
+      category: crypto_asset
+      session: continuous
+      factors: [BTC, ETH]
+      cost_profile: crypto_large
+      logic: exchange ecosystem token exposed to broad crypto activity
+      invalidation: exchange policy or token utility changes materially
+    ARB:
+      perp_symbol: ARBUSDT
+      category: crypto_asset
+      session: continuous
+      factors: [ETH, BTC]
+      cost_profile: crypto_alt
+      logic: Ethereum L2 activity driven by ETH and broad crypto risk
+      invalidation: token economics decouple from Arbitrum usage
+    OP:
+      perp_symbol: OPUSDT
+      category: crypto_asset
+      session: continuous
+      factors: [ETH, BTC]
+      cost_profile: crypto_alt
+      logic: Ethereum L2 activity driven by ETH and broad crypto risk
+      invalidation: token economics decouple from Superchain usage
+    UNI:
+      perp_symbol: UNIUSDT
+      category: crypto_asset
+      session: continuous
+      factors: [ETH, BTC]
+      cost_profile: crypto_alt
+      logic: Ethereum DeFi activity plus broad crypto risk
+      invalidation: protocol fee capture or governance economics change
+    AAVE:
+      perp_symbol: AAVEUSDT
+      category: crypto_asset
+      session: continuous
+      factors: [ETH, BTC]
+      cost_profile: crypto_alt
+      logic: on-chain lending activity plus broad crypto risk
+      invalidation: lending economics or token value capture changes
+    LDO:
+      perp_symbol: LDOUSDT
+      category: crypto_asset
+      session: continuous
+      factors: [ETH, BTC]
+      cost_profile: crypto_alt
+      logic: ETH staking activity plus broad crypto risk
+      invalidation: staking share or governance economics changes materially
+    JTO:
+      perp_symbol: JTOUSDT
+      category: crypto_asset
+      session: continuous
+      factors: [SOL, BTC]
+      cost_profile: crypto_alt
+      logic: Solana ecosystem activity plus broad crypto risk
+      invalidation: protocol economics decouple from Solana activity
+    LINK:
+      perp_symbol: LINKUSDT
+      category: crypto_asset
+      session: continuous
+      factors: [ETH, BTC]
+      cost_profile: crypto_large
+      logic: oracle demand tied to smart-contract and broad crypto activity
+      invalidation: non-EVM adoption becomes the dominant driver
+    AVAX:
+      perp_symbol: AVAXUSDT
+      category: crypto_asset
+      session: continuous
+      factors: [ETH, BTC]
+      cost_profile: crypto_alt
+      logic: smart-contract L1 exposed to ETH and broad crypto risk
+      invalidation: Avalanche-specific adoption dominates market beta
+    SUI:
+      perp_symbol: SUIUSDT
+      category: crypto_asset
+      session: continuous
+      factors: [SOL, BTC]
+      cost_profile: crypto_alt
+      logic: high-throughput L1 exposed to SOL and broad crypto risk
+      invalidation: ecosystem growth creates persistent independent trend
+    NEAR:
+      perp_symbol: NEARUSDT
+      category: crypto_asset
+      session: continuous
+      factors: [ETH, BTC]
+      cost_profile: crypto_alt
+      logic: smart-contract L1 exposed to ETH and broad crypto risk
+      invalidation: chain-specific adoption dominates market beta
+    NVDA:
+      perp_symbol: NVDAUSDT
+      category: tech_equity
+      session: us_rth
+      factors: [QQQ, SOXL]
+      cost_profile: tradfi_large
+      logic: technology market plus semiconductor sector risk
+      invalidation: company-specific AI cycle overwhelms sector exposure
+    AMD:
+      perp_symbol: AMDUSDT
+      category: tech_equity
+      session: us_rth
+      factors: [QQQ, SOXL]
+      cost_profile: tradfi_large
+      logic: technology market plus semiconductor sector risk
+      invalidation: product cycle creates a persistent company-specific trend
+    MU:
+      perp_symbol: MUUSDT
+      category: tech_equity
+      session: us_rth
+      factors: [QQQ, SOXL]
+      cost_profile: tradfi_large
+      logic: technology market plus semiconductor memory cycle risk
+      invalidation: memory pricing cycle dominates the sector hedge
+    AVGO:
+      perp_symbol: AVGOUSDT
+      category: tech_equity
+      session: us_rth
+      factors: [QQQ, SOXL]
+      cost_profile: tradfi_large
+      logic: technology market plus semiconductor sector risk
+      invalidation: software mix materially dominates semiconductor exposure
+    QCOM:
+      perp_symbol: QCOMUSDT
+      category: tech_equity
+      session: us_rth
+      factors: [QQQ, SOXL]
+      cost_profile: tradfi_large
+      logic: technology market plus semiconductor sector risk
+      invalidation: licensing or handset cycle dominates sector exposure
+    TSM:
+      perp_symbol: TSMUSDT
+      category: tech_equity
+      session: us_rth
+      factors: [QQQ, SOXL]
+      cost_profile: tradfi_large
+      logic: technology market plus semiconductor manufacturing risk
+      invalidation: geopolitical or foundry-specific risk dominates
+    META:
+      perp_symbol: METAUSDT
+      category: tech_equity
+      session: us_rth
+      factors: [QQQ, SPY]
+      cost_profile: tradfi_large
+      logic: mega-cap technology plus broad US equity risk
+      invalidation: company event creates persistent idiosyncratic repricing
+    AAPL:
+      perp_symbol: AAPLUSDT
+      category: tech_equity
+      session: us_rth
+      factors: [QQQ, SPY]
+      cost_profile: tradfi_large
+      logic: mega-cap technology plus broad US equity risk
+      invalidation: hardware cycle creates persistent idiosyncratic repricing
+    MSFT:
+      perp_symbol: MSFTUSDT
+      category: tech_equity
+      session: us_rth
+      factors: [QQQ, SPY]
+      cost_profile: tradfi_large
+      logic: mega-cap technology plus broad US equity risk
+      invalidation: cloud or AI cycle dominates market exposure
+    AMZN:
+      perp_symbol: AMZNUSDT
+      category: tech_equity
+      session: us_rth
+      factors: [QQQ, SPY]
+      cost_profile: tradfi_large
+      logic: mega-cap technology plus broad US equity risk
+      invalidation: retail or cloud event dominates market exposure
+    GOOGL:
+      perp_symbol: GOOGLUSDT
+      category: tech_equity
+      session: us_rth
+      factors: [QQQ, SPY]
+      cost_profile: tradfi_large
+      logic: mega-cap technology plus broad US equity risk
+      invalidation: search or AI event dominates market exposure
+  cost_profiles:
+    crypto_major: {roundtrip_spread_bps: 1.0, extra_slippage_per_fill_bps: 0.75}
+    crypto_large: {roundtrip_spread_bps: 2.0, extra_slippage_per_fill_bps: 1.25}
+    crypto_alt: {roundtrip_spread_bps: 4.0, extra_slippage_per_fill_bps: 2.5}
+    crypto_equity: {roundtrip_spread_bps: 8.0, extra_slippage_per_fill_bps: 3.0}
+    crypto_equity_thin: {roundtrip_spread_bps: 12.0, extra_slippage_per_fill_bps: 5.0}
+    tradfi_large: {roundtrip_spread_bps: 6.0, extra_slippage_per_fill_bps: 1.0}
+    tradfi_index: {roundtrip_spread_bps: 3.0, extra_slippage_per_fill_bps: 0.75}
+    tradfi_sector: {roundtrip_spread_bps: 8.0, extra_slippage_per_fill_bps: 2.0}
+  session_parameters:
+    us_rth:
+      regression_lookback_hours: 360
+      regression_min_hours: 180
+      residual_lookback_hours: 360
+      residual_min_hours: 90
+    continuous:
+      regression_lookback_hours: 1440
+      regression_min_hours: 720
+      residual_lookback_hours: 1440
+      residual_min_hours: 600
+  signal_horizon_hours: 2
+  forecast_horizon_hours: 2
+  ridge_alpha: 1.0
+  nonnegative_betas: true
+  min_r2: 0.50
+  max_reversion_t_stat: -1.644853626951
+  max_adf_p_value: 0.05
+  max_abs_beta: 5.0
+  max_gross_beta: 3.0
+  entry_z: 2.0
+  exit_z: 0.5
+  stop_z: 4.0
+  min_holding_hours: 1
+  max_holding_hours: 4
+  execution_delay_minutes: 60
+  stress_delay_minutes: 120
+  minimum_execution_bars_per_hour: 11
+  minimum_signal_bars_per_hour: 2
+  max_contract_mark_gap_bps: 50.0
+  safety_margin_bps: 5.0
+  holdout_fraction: 0.40
+  min_late_sample_trades: 10
+  min_development_trades: 10
+  portfolio_limits:
+    max_concurrent_pairs: 50
+    max_gross_leverage: 1.5
+    max_instrument_net_fraction: 0.05
+
+tradable_research:
+  target_categories: [crypto_asset]
+  dynamic_beta_half_life_hours: 720
+  horizons_hours: [1, 2, 4, 8, 12, 24]
+  primary_horizon_hours: 24
+  basis_lookback_hours: 720
+  basis_min_history_hours: 600
+  volume_lookback_hours: 24
+  train_fraction: 0.50
+  validation_fraction: 0.25
+  test_fraction: 0.25
+  minimum_train_days: 365
+  minimum_validation_days: 90
+  minimum_test_days: 90
+  minimum_validation_trades: 30
+  minimum_validation_subperiod_trades: 20
+  validation_cost_stress_multiplier: 2.0
+  unseen_test_not_before: "2026-07-11"
+  safety_margin_bps: 5.0
+  xgboost:
+    n_estimators: 300
+    max_depth: 3
+    learning_rate: 0.03
+    min_child_weight: 50
+    subsample: 0.80
+    colsample_bytree: 0.80
+    reg_lambda: 10.0
+    reg_alpha: 1.0
+
+alignment:
+  execution_sample_seconds: 2
+  max_source_skew_seconds: 5.0
+  max_source_age_seconds: 5.0
+  max_receive_lag_seconds: 5.0
+  max_clock_uncertainty_ms: 1000.0
+  max_cash_spread_bps: 20.0
+  max_perp_spread_bps: 30.0
+  max_abs_basis_bps: 2000.0
+  allow_assumed_receive_time: false
+
+signal:
+  bar_seconds: 60
+  rolling_window: 1950
+  min_history: 975
+  entry_z: 2.5
+  exit_z: 0.5
+  stop_z: 4.5
+  max_holding_minutes: 120
+  min_holding_minutes: 2
+  safety_margin_bps: 5.0
+
+execution:
+  delay_seconds: 5.0
+  notional_per_leg: 100000.0
+  initial_capital: 30000000.0
+  cash_taker_fee_bps: 1.0
+  perp_taker_fee_bps: 4.0
+  cash_extra_slippage_bps: 1.0
+  perp_extra_slippage_bps: 1.0
+  impact_bps_per_fill: 0.5
+  cash_borrow_rate_annual: 0.02
+  opportunity_cost_annual: 0.04
+  perp_margin_fraction: 0.3333333333
+
+acceptance:
+  min_observed_trading_days: 20
+  min_quality_pass_rate: 0.50
+  min_symbols: 3
+  min_trades: 100
+  min_net_sharpe: 1.0
+  max_symbol_pnl_concentration: 0.40
+  min_positive_month_fraction: 0.50
+  require_edge_monotonicity: true
+  allowed_cash_sources_for_go:
+    - alpaca_sip
+    - direct_executable_cash_l1
+
+output:
+  processed_dir: data/processed
+  report_dir: reports
